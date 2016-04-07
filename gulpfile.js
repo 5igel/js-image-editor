@@ -4,20 +4,47 @@ var watch = require('gulp-watch');
 var source = require('vinyl-source-stream');
 var tsProject = ts.createProject('./src/tsconfig.json');
 var connect = require('gulp-connect');
-/*
- compile typescript
- use ES5 and commonJS module
- */
+var webpack = require('webpack-stream');
+var del = require('del');
+
+var TMP_FOLDER = '.tmp/';
+var DIST_FOLDER = 'dist/';
+
+gulp.task('clean', ['clean:tmp', 'clean:dist']);
+
+gulp.task('clean:tmp', function (cb) {
+    del(TMP_FOLDER, cb);
+});
+
+gulp.task('clean:tmp2', function (cb) {
+    del(TMP_FOLDER, cb);
+});
+
+
+gulp.task('clean:dist', function (cb) {
+    del(DIST_FOLDER, cb);
+});
+
 gulp.task('typescript', function () {
     return gulp.src(
-            [
-                'src/main.ts',
-                'typings/tsd.d.ts'
-            ]
+        [
+            'src/*.ts',
+            'src/*/**.ts',
+            'typings/tsd.d.ts'
+        ]
         )
         .pipe(ts(tsProject))
-        .js.pipe(gulp.dest('dist/js'));
+        .js
+        .pipe(gulp.dest(TMP_FOLDER))
+        .pipe(webpack( require('./webpack.config.js') ))
+        .pipe(gulp.dest(DIST_FOLDER + 'js/'));
 });
+
+gulp.task('build-files', ['clean', 'typescript'], function (cb) {
+    cb();
+});
+gulp.task('build', ['build-files']);
+
 /*
  Web server to test app
  */
@@ -32,8 +59,8 @@ gulp.task('webserver', function () {
  Automatic Live Reload
  */
 gulp.task('livereload', function () {
-    gulp.src(['dist/styles/*.css', 'dist/js/*.js'])
-        .pipe(watch(['dist/styles/*.css', 'dist/js/*.js']))
+    gulp.src(['src/styles/*.css', 'src/**/*.ts'])
+        .pipe(watch(['src/styles/*.css', 'src/**/*.ts']))
         .pipe(connect.reload());
 });
 /*
@@ -66,4 +93,4 @@ gulp.task('watch', function () {
 /*
  default task
  */
-gulp.task('default', ['typescript', 'copy', 'webserver', 'livereload', 'watch']);
+gulp.task('default', ['build', 'copy', 'webserver', 'livereload', 'watch']);
