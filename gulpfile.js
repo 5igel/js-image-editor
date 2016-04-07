@@ -6,24 +6,15 @@ var tsProject = ts.createProject('./src/tsconfig.json');
 var connect = require('gulp-connect');
 var webpack = require('webpack-stream');
 var del = require('del');
+var runSequence = require('run-sequence');
 
 var TMP_FOLDER = '.tmp/';
 var DIST_FOLDER = 'dist/';
 
-gulp.task('clean', ['clean:tmp', 'clean:dist']);
-
-gulp.task('clean:tmp', function (cb) {
-    del(TMP_FOLDER, cb);
+gulp.task('clean', function () {
+    return del([TMP_FOLDER, DIST_FOLDER]);
 });
 
-gulp.task('clean:tmp2', function (cb) {
-    del(TMP_FOLDER, cb);
-});
-
-
-gulp.task('clean:dist', function (cb) {
-    del(DIST_FOLDER, cb);
-});
 
 gulp.task('typescript', function () {
     return gulp.src(
@@ -40,11 +31,9 @@ gulp.task('typescript', function () {
         .pipe(gulp.dest(DIST_FOLDER + 'js/'));
 });
 
-gulp.task('build-files', ['clean', 'typescript'], function (cb) {
-    cb();
+gulp.task('build', function (cb) {
+    runSequence('clean', 'typescript', 'copy', cb);
 });
-gulp.task('build', ['build-files']);
-
 /*
  Web server to test app
  */
@@ -93,4 +82,4 @@ gulp.task('watch', function () {
 /*
  default task
  */
-gulp.task('default', ['build', 'copy', 'webserver', 'livereload', 'watch']);
+gulp.task('default', ['build', 'webserver', 'livereload', 'watch']);

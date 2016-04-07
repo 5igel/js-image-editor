@@ -29,7 +29,7 @@
     "gulp-connect": "^3.1.0",
     "gulp-typescript": "^2.12.1",
     "gulp-watch": "^4.3.5",
-    "gulp-webpack": "^1.5.0",
+    "run-sequence": "^1.1.5",
     "ts-loader": "^0.8.1",
     "typescript": "^1.8.7",
     "vinyl-source-stream": "^1.1.0",
